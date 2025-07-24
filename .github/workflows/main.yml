@@ -1,6 +1,8 @@
 name: Scrape Anichin Anime List & Video
 
 on:
+  push:
+  pull_request:
   workflow_dispatch: # Bisa dijalankan manual dari GitHub UI
   schedule:
     - cron: '0 3 * * *' # (opsional) jalan setiap hari jam 3 pagi UTC
