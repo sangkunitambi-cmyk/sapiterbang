@@ -1,9 +1,9 @@
-name: Scrape Anichin List Mode
+name: Scrape Anichin dengan Cloudscraper
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
   schedule:
     - cron: '0 2 * * *'
 
@@ -19,14 +19,16 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Scrapy
-        run: pip install scrapy
+      - name: Install dependencies
+        run: |
+          pip install cloudscraper beautifulsoup4 fake-useragent
 
-      - name: Run Scrapy Spider
-        run: scrapy runspider anichin_listmode_spider.py -o hasil.json
+      - name: Jalankan Scraper
+        run: |
+          python enhanced_scraper_metode1.py
 
       - name: Upload hasil scraping
         uses: actions/upload-artifact@v4
         with:
           name: hasil-scraping
-          path: hasil.json
+          path: scraping_results/*.json
