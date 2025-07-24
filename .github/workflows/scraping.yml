@@ -21,11 +21,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install cloudscraper beautifulsoup4 fake-useragent
+          pip install cloudscraper beautifulsoup4
 
       - name: Jalankan Scraper
-        run: |
-          python enhanced_scraper_metode1.py
+        run: python enhanced_scraper_metode1.py
+
+      - name: List hasil scraping
+        run: ls -lah scraping_results
 
       - name: Upload hasil scraping
         uses: actions/upload-artifact@v4
