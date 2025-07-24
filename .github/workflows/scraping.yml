@@ -1,0 +1,32 @@
+name: Scrape Anichin List Mode
+
+on:
+  workflow_dispatch: # bisa dijalankan manual
+  schedule:
+    - cron: '0 2 * * *' # otomatis tiap hari jam 9 pagi WIB
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Scrapy
+        run: pip install scrapy
+
+      - name: Run Scrapy Spider
+        run: scrapy runspider anichin_listmode_spider.py -o hasil.json
+
+      - name: Commit hasil scraping
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add hasil.json
+          git commit -m "Update hasil scraping"
+          git push
