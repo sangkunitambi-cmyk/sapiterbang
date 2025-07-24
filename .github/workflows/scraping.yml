@@ -1,9 +1,13 @@
 name: Scrape Anichin List Mode
 
 on:
-  workflow_dispatch: # bisa dijalankan manual
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *' # otomatis tiap hari jam 9 pagi WIB
+    - cron: '0 2 * * *'
 
 jobs:
   scrape:
