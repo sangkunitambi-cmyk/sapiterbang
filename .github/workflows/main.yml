@@ -1,37 +1,35 @@
-name: Run Scraper on Push or Manual
+name: Run Scraper
 
 on:
-  push:
-    paths:
-      - scrape.py
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-scraper:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies (jika perlu requirements.txt)
-      run: |
-        pip install -r requirements.txt || true
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
 
-    - name: Run scraper
-      run: python scrape.py
+      - name: Run scraper
+        run: python scrape.py
 
-    - name: Commit hasil scrape ke repo
-      run: |
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git add hasil_*.*
-        git commit -m "Update hasil scrape"
-        git push
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit & push hasil scrape
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add hasil_iframe.txt
+          git commit -m "Hasil scrape terbaru"
+          git push
