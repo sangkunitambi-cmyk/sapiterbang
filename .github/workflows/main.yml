@@ -1,7 +1,11 @@
 name: Scrape Anichin Iframe
 
+# ✅ Trigger bisa manual & otomatis tiap push ke repo
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - python scrape.py  # Bisa diganti sesuai file lo
 
 permissions:
   contents: write
@@ -9,8 +13,10 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -18,7 +24,8 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4
+        run: |
+          pip install requests beautifulsoup4
 
       - name: Run scraper
         run: python scrape.py
@@ -27,6 +34,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add result.json
-          git commit -m "Update result.json"
-          git push
+          git add result.json || echo "Nothing to commit"
+          git commit -m "Update result.json" || echo "No changes"
+          git push || echo "No push"
