@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import base64
 import time
+import binascii
 
 def get_episode_links(series_url):
     r = requests.get(series_url)
@@ -13,8 +14,12 @@ def get_episode_links(series_url):
 def get_video_iframe(episode_url):
     r = requests.get(episode_url)
     soup = BeautifulSoup(r.text, "html.parser")
+    
     iframe = soup.select_one('#embed_holder .player-embed iframe')
     main_video = iframe['src'] if iframe else None
+
+    if not main_video:
+        print(f"Iframe video utama tidak ditemukan untuk {episode_url}")
 
     mirrors = []
     for option in soup.select('select.mirror option'):
@@ -28,8 +33,9 @@ def get_video_iframe(episode_url):
                         'server': option.text.strip(),
                         'iframe': iframe_tag['src']
                     })
-            except Exception:
-                pass
+            except (binascii.Error, UnicodeDecodeError) as e:
+                print(f"Error dekode Base64 untuk server {option.text.strip()}: {e}")
+                continue # Lanjutkan ke mirror berikutnya
 
     return {
         'main_video': main_video,
