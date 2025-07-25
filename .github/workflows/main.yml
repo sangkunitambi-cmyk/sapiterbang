@@ -10,12 +10,16 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+
+    # --- PERBAIKAN DI SINI ---
+    # "contents: write" harus menjorok ke dalam (indent)
+    # di bawah "permissions:"
     permissions:
-  contents: write
+      contents: write
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Disarankan menggunakan versi terbaru
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -24,18 +28,22 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install beautifulsoup4 requests
 
       - name: Run scraping script
-        run: |
-          python scrape_anichin_from_json.py
+        # Tidak perlu | jika hanya satu baris
+        run: python scrape_anichin_from_json.py
 
       - name: Commit & Push Results
         run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add scraped_result.json
-          git commit -m "Update scraped anime & video list"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Tambahkan pengecekan agar tidak error jika tidak ada perubahan
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update scraped anime & video list"
+            git push
+          fi
