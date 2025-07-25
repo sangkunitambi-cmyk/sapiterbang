@@ -3,7 +3,7 @@ name: Run Scraper on Push or Manual
 on:
   push:
     paths:
-      - python scrape.py
+      - scrape.py
   workflow_dispatch:
 
 jobs:
