@@ -1,19 +1,19 @@
-name: Scrape Anichin Anime List & Video
+name: Scrape Anichin With Proxy Rotation
 
 on:
   push:
     branches:
-      - main  # Hanya jalan kalau ada push ke branch main
-  workflow_dispatch: # Bisa dijalankan manual dari GitHub UI
+      - main
+  workflow_dispatch:
   schedule:
-    - cron: '0 3 * * *' # Jalan setiap hari jam 3 pagi UTC
+    - cron: '0 3 * * *'
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Izin untuk push hasil scraping kembali ke repo
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -24,7 +24,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      # --- LANGKAH BARU YANG KRUSIAL ---
       - name: Set up Chrome Browser
         uses: browser-actions/setup-chrome@v1
         id: setup-chrome
@@ -32,13 +31,18 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Kita install selenium dan beautifulsoup4
-          pip install selenium beautifulsoup4
+          # Install semua library yang dibutuhkan oleh kedua script
+          pip install selenium-wire beautifulsoup4 requests
 
-      - name: Run scraping script
-        run: python scrape_anichin_selenium.py # Nama file script kita ganti
+      - name: Check for Live Proxies
+        id: check_proxies
+        run: python check_proxies.py
+
+      - name: Run Main Scraper with Rotation
+        # Hanya jalan jika step 'check_proxies' berhasil
+        if: steps.check_proxies.outcome == 'success'
+        run: python scrape_anichin.py # Nama script utama kita
         env:
-          # Memberitahu Selenium di mana lokasi Chrome yang sudah di-install
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
 
       - name: Commit & Push Results
@@ -46,17 +50,9 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add scraped_result.json
-          # Cek apakah ada perubahan sebelum commit
           if git diff --staged --quiet; then
             echo "No changes detected, skipping commit."
           else
-            git commit -m "Update: Scraped anime & video list"
+            git commit -m "Update: Scraped anime list with proxy rotation"
             git push
           fi
-
-      - name: Upload debug artifact on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-screenshot
-          path: debug_screenshot.png # Akan mengupload screenshot jika script gagal
