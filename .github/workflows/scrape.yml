@@ -2,39 +2,30 @@ name: Scrape Episodes
 
 on:
   schedule:
-    - cron: '0 6 * * *'     # setiap hari jam 06:00 UTC
-  workflow_dispatch:         # tombol run manual
+    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write           # izin push ke repo
+  contents: write
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout repo (token default sudah bisa write)
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 2. Setup Node
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 3. Install dependencies
-      - name: Install deps
-        run: npm ci
+      - name: Install deps ( tanpa lock-file )
+        run: npm install
 
-      # 4. Install browser
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
 
-      # 5. Run scraper
       - name: Run scraper
         run: npm run scrape
 
-      # 6. Commit & push jika ada perubahan
       - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
